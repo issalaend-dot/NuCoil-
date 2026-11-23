@@ -313,7 +313,7 @@ const std::string PAGINA_HTML = R"HTML(<!doctype html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BioCoil C++ | Ingeniería de Serpentines en Biorreactores</title>
+  <title>NuCoil | Ingeniería de Serpentines en Biorreactores</title>
   <style>
     :root {
       --bg: #0b1120;
@@ -492,7 +492,7 @@ const std::string PAGINA_HTML = R"HTML(<!doctype html>
       <div class="badge-cpp">C++17 ENGINE</div>
       <div>
         <h1>BioCoil Studio · Diseño de Serpentín de Enfriamiento</h1>
-        <small>Fenómenos de Transporte · Servidor HTTP Nativo en C++ (Sin APIs externas)</small>
+        <small>Fenómenos de Transporte · Diseño Térmico de Biorreactores</small>
       </div>
     </div>
     <div class="toolbar">
@@ -506,7 +506,7 @@ const std::string PAGINA_HTML = R"HTML(<!doctype html>
   <div class="container">
     <!-- PANEL DE ENTRADAS -->
     <div class="card">
-      <h2>Parámetros de Proceso <span style="font-size:0.72rem;color:var(--emerald);">● Cálculo C++ en vivo</span></h2>
+      <h2>Parámetros de Proceso <span style="font-size:0.72rem;color:var(--emerald);">● Live</span></h2>
       <div class="tabs">
         <button type="button" class="tab-btn active" onclick="abrirTab(0)">1. Calor & Rxn</button>
         <button type="button" class="tab-btn" onclick="abrirTab(1)">2. Agitación</button>
@@ -607,7 +607,7 @@ const std::string PAGINA_HTML = R"HTML(<!doctype html>
         </div>
 
         <div class="card">
-          <h2>Desglose de Ingeniería (Resultados C++)</h2>
+          <h2>Desglose de Ingeniería</h2>
           <table class="table-res">
             <tr><td>Entalpía de reacción calculada (|ΔHᵣ|)</td><td id="resDh">—</td></tr>
             <tr><td>Calor metabólico de fermentación (Q_rxn)</td><td id="resQrxn">—</td></tr>
@@ -629,7 +629,7 @@ const std::string PAGINA_HTML = R"HTML(<!doctype html>
       </div>
 
       <div class="card">
-        <h2>Fundamentación Matemática Implementada en el Servidor C++</h2>
+        <h2>Fundamentación Matemática del Modelo</h2>
         <div class="eq-box">1. Entalpía y Balance: ΔHᵣ = ΔHc°_S − Y_X/S · ΔHc°_X  |  Q_rxn = (|ΔHᵣ| · ṅ · f_calor)/3600  |  P₀ = Nₚ·ρ·N³·Dₐ⁵  |  P_g = 0.706·(P₀²·N·Dₐ³/Q_g^0.56)^0.45</div>
         <div class="eq-box">2. Convección Exterior e Interior: Nu_o = 0.87·Reₐ^0.62·Pr^(1/3) (Doran Fig. 9.17)  |  Nu_i = Nu_Gnielinski · (1 + 3.5·Dᵢ/D_hélice)</div>
         <div class="eq-box">3. Resistencias y Geometría: 1/Uₒ = 1/hₒ + R_f + [Dₒ·ln(Dₒ/Dᵢ)]/(2k) + Dₒ/(Dᵢ·hᵢ)  |  Aₒ = Q_total/(Uₒ·ΔT_lm)  |  N = L / √[(π·D_hélice)² + p²]</div>
