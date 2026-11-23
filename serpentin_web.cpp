@@ -527,23 +527,9 @@ body{--bp-paper:#0c2a4d;--bp-line:#d8ecff;--bp-dim:#7fd0ff;--bp-grid:#16406f;--b
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=JetBrains+Mono:wght@400;500;600&family=Spline+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style id="amber-plano-theme">
   :root, .iso {
-    --ink: #16201f;
-    --abyss: #0e2a29;
-    --teal: #1f6b6a;
-    --teal-bright: #2d8b8b;
-    --seafoam: #9ec9c6;
-    --parchment: #f4f1e8;
-    --parchment-deep: #ebe6d6;
-    --cream: #fbfaf4;
-    --gold: #b08440;
-    --gold-soft: #c89a52;
-    --rule: #d8d2bf;
-    --code-bg: #10302e;
-    --code-ink: #dfeae7;
     --anatomy-mono: 'JetBrains Mono', ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     --acc: #e6b566;
   }
-  /* Modo claro editorial (pergamino y tinta abisal) */
   .iso[data-theme="light"], body[data-theme="light"] {
     --anatomy-page: #f4f1e8;
     --anatomy-card: #fbfaf4;
@@ -568,7 +554,6 @@ body{--bp-paper:#0c2a4d;--bp-line:#d8ecff;--bp-dim:#7fd0ff;--bp-grid:#16406f;--b
     --bp-fill: #f0ece1;
     --acc: #b08440;
   }
-  /* Modo oscuro abisal (inspirado en bloques de codigo AMBER) */
   .iso[data-theme="dark"], body[data-theme="dark"] {
     --anatomy-page: #0b2221;
     --anatomy-card: #10302e;
@@ -590,16 +575,11 @@ body{--bp-paper:#0c2a4d;--bp-line:#d8ecff;--bp-dim:#7fd0ff;--bp-grid:#16406f;--b
   body {
     font-family: 'Spline Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
     background-color: var(--anatomy-page) !important;
-    background-image:
-      radial-gradient(circle at 12% 8%, rgba(45, 139, 139, 0.07), transparent 40%),
-      radial-gradient(circle at 88% 92%, rgba(176, 132, 64, 0.07), transparent 42%);
   }
-  .top h1, #info h3, .col-card h4 {
+  .top h1, #info h3 {
     font-family: 'Fraunces', Georgia, serif !important;
     font-weight: 500 !important;
-    letter-spacing: -0.01em;
   }
-  .top h1 { font-size: 1.35rem !important; }
   .iso-plate.stagecard {
     border-radius: 12px !important;
     box-shadow: 0 14px 32px -20px rgba(14, 42, 41, 0.35), 0 0 0 1px var(--bp-dim) !important;
@@ -613,16 +593,13 @@ body{--bp-paper:#0c2a4d;--bp-line:#d8ecff;--bp-dim:#7fd0ff;--bp-grid:#16406f;--b
     font-family: 'JetBrains Mono', monospace !important;
     letter-spacing: 0.14em !important;
   }
-  .chip, .btn, .seg {
-    border-radius: 8px !important;
-    transition: all 0.2s ease;
-  }
+  .btn, .seg { border-radius: 8px !important; }
   .chip { border-radius: 999px !important; }
 </style>
 </head>
 <body class="iso" data-theme="dark">
-<div id="nucoil-nav" style="background:rgba(244,241,232,0.92);backdrop-filter:blur(10px);border-bottom:1px solid #d8d2bf;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;font-family:'Spline Sans',system-ui,sans-serif;font-size:13px;color:#0e2a29;position:sticky;top:0;z-index:40">
-  <span style="font-family:'Fraunces',serif;font-size:15px;font-weight:500">NuCoil <em style="color:#1f6b6a;font-style:italic">· Plano en Sección</em></span>
+<div id="nucoil-nav" style="background:var(--anatomy-card);border-bottom:1px solid var(--anatomy-lo);padding:10px 18px;display:flex;justify-content:space-between;align-items:center;font-family:'Spline Sans',system-ui,sans-serif;font-size:13px;color:var(--anatomy-strong);position:sticky;top:0;z-index:40">
+  <span style="font-family:'Fraunces',serif;font-size:15px;font-weight:500">NuCoil <em style="color:var(--acc);font-style:italic">· Plano en Sección</em></span>
   <a id="btn-volver-calc" href="/" style="background:#1f6b6a;color:#fbfaf4;text-decoration:none;padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.04em">← Calculadora Térmica</a>
 </div>
 <div class="app">
@@ -1198,29 +1175,7 @@ function plateHtml({ fig, title, hint, readout = "", keys = [], caption, body })
     return `<figure class="iso-figure"><div class="iso-plate"><div class="iso-plate-corners" aria-hidden="true">${corner("fig", fig)}${title ? corner("title", title) : ""}${hint ? corner("hint", hint) : ""}${corner("readout", readout, " data-readout")}</div>${body}</div>${legend}</figure>`;
 }
 function pageHtml({ title, theme = "dark", body, script = "", width = 650 }) {
-    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escape(title)}</title><style>${ISO_CSS}${PAGE_CSS.replace("__WIDTH__", String(width))}</style></head><body class="iso" data-theme="${theme}"><main class="iso-page">${body}</main>${script ? `<script type="module">${script.replace(/<\/(script)/gi, "<\\/$1")}<\/script>` : ""}<script>
-(function(){
-  const back = document.getElementById('btn-volver-calc');
-  if (back && location.protocol === 'file:') back.href = 'index.html';
-  const q = new URLSearchParams(location.search);
-  if ([...q.keys()].length && window.BiorreactorApp) {
-    const num = (ks) => { for (const k of ks) { const v = parseFloat(q.get(k)); if (Number.isFinite(v) && v > 0) return v; } return null; };
-    const p = {}, Di = num(['Di','Dt']), Ht = num(['Ht','H']), De = num(['De','dt']), Dc = num(['Dc']), paso = num(['p']), Vw = num(['Vw','V']), N = num(['N']), Tin = num(['Tin','T_c_in']), Tout = num(['Tout','T_c_out']), caudal = num(['caudal','Q_agua']), T0 = num(['T0','T_op']);
-    if (Di) p.Di = Di < 5 ? Di * 100 : Di;
-    if (Ht) p.Ht = Ht < 10 ? Ht * 100 : Ht;
-    if (De) p.De = De < 0.2 ? De * 1000 : De;
-    if (Dc) p.Dc = Dc < 5 ? Dc * 100 : Dc;
-    if (paso) p.p = paso < 1 ? paso * 100 : paso;
-    if (Vw) p.Vw = Vw < 5 ? Vw * 1000 : Vw;
-    if (N) p.N = N;
-    if (Tin !== null) p.Tin = Tin;
-    if (Tout !== null) p.Tout = Tout;
-    if (caudal) p.caudal = caudal;
-    if (T0) { p.T0 = T0; p.Tobj = Math.max(4, T0 - 10); }
-    try { window.BiorreactorApp.setParametros(p); } catch (e) {}
-  }
-})();
-</script></body></html>`;
+    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escape(title)}</title><style>${ISO_CSS}${PAGE_CSS.replace("__WIDTH__", String(width))}</style></head><body class="iso" data-theme="${theme}"><main class="iso-page">${body}</main>${script ? `<script type="module">${script.replace(/<\/(script)/gi, "<\\/$1")}<\/script>` : ""}</body></html>`;
 }
 const PAGE_CSS = `
 *{box-sizing:border-box}
@@ -2237,7 +2192,56 @@ const APP = (() => {
   }
   return { init, state };
 })();
+
 APP.init();
+(() => {
+  const back = document.getElementById('btn-volver-calc');
+  if (back && location.protocol === 'file:') back.href = 'index.html';
+  const q = new URLSearchParams(location.search);
+  if ([...q.keys()].length && window.BiorreactorApp) {
+    const entries = [...q.entries()].map(([k, v]) => [k.toLowerCase(), parseFloat(v)]);
+    const findVal = (exacts, parts) => {
+      for (const e of exacts) {
+        const hit = entries.find(([k, v]) => k === e.toLowerCase() && Number.isFinite(v) && v > 0);
+        if (hit) return hit[1];
+      }
+      for (const p of parts) {
+        const hit = entries.find(([k, v]) => k.includes(p) && Number.isFinite(v) && v > 0);
+        if (hit) return hit[1];
+      }
+      return null;
+    };
+    const patch = {};
+    const Di = findVal(['Di', 'Dt', 'diamTanque', 'diametroTanque'], ['diamtanque', 'diametrotanque', 'tanque']);
+    const Ht = findVal(['Ht', 'H', 'alturaTanque'], ['alturatanque', 'altura']);
+    const De = findVal(['De', 'dt', 'diamTubo', 'diametroTubo'], ['diamtubo', 'diametrotubo', 'tubo']);
+    const Dc = findVal(['Dc', 'diamHelice', 'diametroHelice'], ['diamhelice', 'diametrohelice', 'helice']);
+    const paso = findVal(['p', 'paso', 'pasoHelice'], ['paso']);
+    const Vw = findVal(['Vw', 'V', 'volTrabajo', 'volumen'], ['voltrabajo', 'volumen']);
+    const N = findVal(['N', 'vueltas', 'numVueltas'], ['vuelta']);
+    const Tin = findVal(['Tin', 'T_c_in', 'tempAguaIn'], ['aguain', 'entrada']);
+    const Tout = findVal(['Tout', 'T_c_out', 'tempAguaOut'], ['aguaout', 'salida']);
+    const caudal = findVal(['caudal', 'Q_agua', 'flujoAgua'], ['flujo', 'caudal']);
+    const T0 = findVal(['T0', 'T_op', 'tempOperacion'], ['operacion', 'cultivo']);
+
+    if (Di) patch.Di = Di < 5 ? Di * 100 : Di;
+    if (Ht) patch.Ht = Ht < 10 ? Ht * 100 : Ht;
+    if (De) patch.De = De < 0.2 ? De * 1000 : De;
+    if (Dc) patch.Dc = Dc < 5 ? Dc * 100 : Dc;
+    if (paso) patch.p = paso < 1 ? paso * 100 : paso;
+    if (Vw) patch.Vw = Vw < 5 ? Vw * 1000 : Vw;
+    if (N) patch.N = N;
+    if (Tin !== null) patch.Tin = Tin;
+    if (Tout !== null) patch.Tout = Tout;
+    if (caudal) patch.caudal = caudal;
+    if (T0) { patch.T0 = T0; patch.Tobj = Math.max(4, T0 - 10); }
+
+    if (Object.keys(patch).length) {
+      try { window.BiorreactorApp.setParametros(patch); } catch (e) {}
+    }
+  }
+})();
+
 </script></body></html>
 )PLANO";
 
@@ -2944,7 +2948,7 @@ int main() {
                  << body;
 
             std::string fullResp = resp.str();
-            send(clientFd, fullResp.data(), fullResp.size(), 0);
+            { size_t _sent = 0; while (_sent < fullResp.size()) { ssize_t _n = send(clientFd, fullResp.data() + _sent, fullResp.size() - _sent, 0); if (_n <= 0) break; _sent += static_cast<size_t>(_n); } }
         }
         close(clientFd);
     }
