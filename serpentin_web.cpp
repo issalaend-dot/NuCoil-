@@ -2430,7 +2430,7 @@ const std::string PAGINA_HTML = R"HTML(
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=JetBrains+Mono:wght@400;500;600&family=Spline+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style id="amber-editorial-theme">
-  :root {
+  :root, body[data-theme="light"] {
     --ink: #16201f;
     --abyss: #0e2a29;
     --teal: #1f6b6a;
@@ -2447,128 +2447,190 @@ const std::string PAGINA_HTML = R"HTML(
     --border: #d8d2bf;
     --text: #16201f;
     --muted: #5a6b69;
-    --accent: #1f6b6a;
-    --accent2: #b08440;
+    --input-bg: #f4f1e8;
+    --input-border: #c4bca6;
+    --tab-bg: #ebe6d6;
+    --ok-bg: rgba(31, 107, 106, 0.11);
+    --ok-fg: #1f6b6a;
+    --ok-bd: rgba(31, 107, 106, 0.30);
+    --bad-bg: rgba(185, 28, 28, 0.13);
+    --bad-fg: #991b1b;
+    --bad-bd: #dc2626;
   }
+
+  body[data-theme="dark"] {
+    --ink: #dfeae7;
+    --abyss: #f4f1e8;
+    --teal: #2d8b8b;
+    --teal-bright: #9ec9c6;
+    --parchment: #0b2221;
+    --parchment-deep: #153b38;
+    --cream: #10302e;
+    --gold: #e6b566;
+    --rule: #244b48;
+    --code-bg: #081918;
+    --code-ink: #dfeae7;
+    --bg: #0b2221;
+    --card: #10302e;
+    --border: #244b48;
+    --text: #dfeae7;
+    --muted: #8fb5b0;
+    --input-bg: #0b2221;
+    --input-border: #2b5451;
+    --tab-bg: #153b38;
+    --ok-bg: rgba(45, 139, 139, 0.18);
+    --ok-fg: #9ec9c6;
+    --ok-bd: rgba(158, 201, 198, 0.32);
+    --bad-bg: rgba(239, 68, 68, 0.20);
+    --bad-fg: #fca5a5;
+    --bad-bd: #ef4444;
+  }
+
   body {
     font-family: 'Spline Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-    background-color: #f4f1e8 !important;
-    color: #16201f !important;
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
     margin: 0 !important;
-    padding-top: 0 !important;
-    background-image:
-      radial-gradient(circle at 12% 8%, rgba(45, 139, 139, 0.06), transparent 40%),
-      radial-gradient(circle at 88% 92%, rgba(176, 132, 64, 0.06), transparent 42%) !important;
+    padding-top: 10px !important;
+    transition: background-color 0.2s ease, color 0.2s ease;
     -webkit-font-smoothing: antialiased;
   }
-  header, .header, .top-bar {
-    padding-top: 18px !important;
-    margin-top: 0 !important;
-  }
+
   h1, h2, h3, .title, .brand-title {
     font-family: 'Fraunces', Georgia, serif !important;
-    color: #0e2a29 !important;
+    color: var(--abyss) !important;
     letter-spacing: -0.015em;
   }
+
   .card, .panel, .box, section {
-    background: #fbfaf4 !important;
-    border: 1px solid #d8d2bf !important;
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    border-top-color: var(--border) !important;
     border-radius: 12px !important;
-    box-shadow: 0 12px 28px -22px rgba(14, 42, 41, 0.35) !important;
+    box-shadow: 0 12px 28px -22px rgba(0, 0, 0, 0.35) !important;
   }
-  /* Cifras grandes en tarjetas KPI y valores en Desglose de Ingenieria */
+
+  /* Ocultar cualquier barra roja superior de alerta */
+  #error-banner, #alert-banner, .error-banner, .alert-danger, .top-error {
+    display: none !important;
+  }
+
   .kpi-val, .kpi-value, .big-val, .stat-val, .metric-val,
   .card strong, .card b, .res-val, .row-val, .data-val,
   [id^="kpi"], [id^="res"], [id^="val"] {
     font-family: 'JetBrains Mono', monospace !important;
-    color: #0e2a29 !important;
+    color: var(--abyss) !important;
     font-weight: 600 !important;
   }
+
   input, select {
     font-family: 'JetBrains Mono', monospace !important;
-    background: #f4f1e8 !important;
-    color: #0e2a29 !important;
-    border: 1px solid #c4bca6 !important;
+    background: var(--input-bg) !important;
+    color: var(--abyss) !important;
+    border: 1px solid var(--input-border) !important;
     border-radius: 8px !important;
   }
   input:focus, select:focus {
     outline: none !important;
-    border-color: #1f6b6a !important;
-    box-shadow: 0 0 0 3px rgba(31, 107, 106, 0.14) !important;
+    border-color: var(--teal) !important;
+    box-shadow: 0 0 0 3px rgba(45, 139, 139, 0.18) !important;
   }
-  label, .sub, .subtitle, p, .muted {
-    color: #3c4a48 !important;
+  input.nucoil-input-bad {
+    border-color: var(--bad-bd) !important;
+    background: var(--bad-bg) !important;
   }
+
+  label, .sub, .subtitle, p, .muted, span {
+    color: var(--text);
+  }
+  .sub, .subtitle, .muted, label {
+    color: var(--muted) !important;
+  }
+
   code, pre, .mono, .val, .value, .badge, .pill, table td, table th {
     font-family: 'JetBrains Mono', monospace !important;
   }
+
+  /* Indicadores inferiores: verde cuando cumplen, rojo cuando fallan */
   .badge, .pill {
-    background: rgba(31, 107, 106, 0.1) !important;
-    color: #1f6b6a !important;
-    border: 1px solid rgba(31, 107, 106, 0.28) !important;
+    background: var(--ok-bg);
+    color: var(--ok-fg);
+    border: 1px solid var(--ok-bd);
+    border-radius: 8px !important;
+    transition: all 0.2s ease;
   }
-  /* Pestanas inactivas vs activa */
+  .badge.bad, .badge.err, .badge.error, .badge.danger, .badge.warn, .badge.warning,
+  .pill.bad, .pill.err, .pill.error, .pill.danger, .pill.warn, .pill.warning,
+  .nucoil-status-bad {
+    background: var(--bad-bg) !important;
+    color: var(--bad-fg) !important;
+    border: 1.5px solid var(--bad-bd) !important;
+    font-weight: 600 !important;
+  }
+
+  /* Pestanas */
   .tab, .tab-btn, [role="tab"] {
     font-family: 'JetBrains Mono', monospace !important;
-    background: #ebe6d6 !important;
-    color: #0e2a29 !important;
-    border: 1px solid #d8d2bf !important;
+    background: var(--tab-bg) !important;
+    color: var(--abyss) !important;
+    border: 1px solid var(--border) !important;
     border-radius: 8px !important;
   }
   .tab.active, .tab-btn.active, [role="tab"].active, [role="tab"][aria-selected="true"] {
-    background: #1f6b6a !important;
+    background: var(--teal) !important;
     color: #fbfaf4 !important;
-    border-color: #1f6b6a !important;
+    border-color: var(--teal) !important;
   }
-  /* Botones de accion */
+
+  /* Botones */
   button:not(.tab):not(.tab-btn):not([role="tab"]), .btn {
     font-family: 'JetBrains Mono', monospace !important;
-    background: #1f6b6a !important;
+    background: var(--teal) !important;
     color: #fbfaf4 !important;
-    border: 1px solid #1f6b6a !important;
+    border: 1px solid var(--teal) !important;
     border-radius: 8px !important;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.1s ease;
   }
   button:not(.tab):not(.tab-btn):not([role="tab"]):hover, .btn:hover {
-    background: #0e2a29 !important;
+    opacity: 0.9;
   }
-  button.secondary, .btn-secondary {
-    background: #fbfaf4 !important;
-    color: #0e2a29 !important;
-    border: 1px solid #b08440 !important;
+  button.secondary, .btn-secondary, #btn-theme-main {
+    background: var(--card) !important;
+    color: var(--abyss) !important;
+    border: 1px solid var(--gold) !important;
   }
+  #btn-abrir-plano {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 8px !important;
+    background: var(--gold) !important;
+    color: #0b2221 !important;
+    border: 1px solid var(--gold) !important;
+    font-weight: 600 !important;
+  }
+
   pre, .report-box, textarea {
-    background: #10302e !important;
-    color: #dfeae7 !important;
-    border: 1px solid rgba(158, 201, 198, 0.22) !important;
+    background: var(--code-bg) !important;
+    color: var(--code-ink) !important;
+    border: 1px solid var(--border) !important;
     border-radius: 10px !important;
     font-family: 'JetBrains Mono', monospace !important;
   }
   hr {
     border: 0 !important;
-    border-top: 1px solid #d8d2bf !important;
+    border-top: 1px solid var(--border) !important;
   }
 </style>
 </head>
-<body>
-<div id="nucoil-top-switch" style="background:rgba(244,241,232,0.92);backdrop-filter:blur(10px);border-bottom:1px solid #d8d2bf;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;font-family:'Spline Sans',system-ui,sans-serif;font-size:13px;color:#0e2a29;position:sticky;top:0;z-index:40">
-  <span style="font-family:'Fraunces',serif;font-size:15px;font-weight:500">NuCoil <em style="color:#b08440;font-style:italic">· Ingeniería Térmica</em></span>
-  <a id="btn-abrir-plano" href="/plano" style="background:#1f6b6a;color:#fbfaf4;text-decoration:none;padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.04em">Plano en Sección 2D →</a>
-</div>
-<script>
-document.addEventListener('click', function(e){
-  const a = e.target.closest('#btn-abrir-plano');
-  if (!a) return;
-  const qs = new URLSearchParams();
-  document.querySelectorAll('input[id], input[name]').forEach(el => {
-    if (el.value) qs.set(el.id || el.name, el.value);
-  });
-  const base = location.protocol === 'file:' ? 'plano.html' : '/plano';
-  a.href = base + (qs.toString() ? '?' + qs.toString() : '');
-});
-</script>
-
-  <header>
+<body data-theme="light">
+<header>
     <div class="brand">
       <div class="badge-cpp">C++17 ENGINE</div>
       <div>
@@ -2888,6 +2950,102 @@ document.addEventListener('click', function(e){
     campos.forEach(id => document.getElementById(id).addEventListener('input', recalcular));
     window.addEventListener('DOMContentLoaded', recalcular);
   </script>
+<script id="nucoil-main-ui-enhance">
+(function(){
+  // Tema inicial persistente
+  const saved = localStorage.getItem('nucoil-theme');
+  if (saved === 'dark' || saved === 'light') {
+    document.body.dataset.theme = saved;
+  }
+
+  function buildPlanoHref() {
+    const qs = new URLSearchParams();
+    document.querySelectorAll('input[id], input[name]').forEach(el => {
+      if (el.value !== '') qs.set(el.id || el.name, el.value);
+    });
+    const base = location.protocol === 'file:' ? 'plano.html' : '/plano';
+    return base + (qs.toString() ? '?' + qs.toString() : '');
+  }
+
+  function injectHeaderButtons() {
+    if (document.getElementById('btn-abrir-plano')) return;
+    // Buscar la barra que contiene "Caso Base" o "Doran"
+    const allBtns = [...document.querySelectorAll('button')];
+    const presetBtn = allBtns.find(b => /caso base|doran|reporte/i.test(b.textContent || ''));
+    const container = presetBtn ? presetBtn.parentElement : (document.querySelector('header') || document.body);
+
+    const link2d = document.createElement('a');
+    link2d.id = 'btn-abrir-plano';
+    link2d.href = '/plano';
+    link2d.textContent = 'Plano en Sección 2D →';
+    link2d.addEventListener('click', function() {
+      link2d.href = buildPlanoHref();
+    });
+
+    const themeBtn = document.createElement('button');
+    themeBtn.type = 'button';
+    themeBtn.id = 'btn-theme-main';
+    themeBtn.className = presetBtn ? presetBtn.className : 'btn secondary';
+    themeBtn.textContent = 'Claro / oscuro';
+    themeBtn.addEventListener('click', function() {
+      const next = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.body.dataset.theme = next;
+      localStorage.setItem('nucoil-theme', next);
+    });
+
+    container.appendChild(link2d);
+    container.appendChild(themeBtn);
+  }
+
+  function syncStatusColors() {
+    // Revisar inputs numericos negativos o cero
+    let anyNegative = false;
+    document.querySelectorAll('input[type="number"], input[type="text"]').forEach(inp => {
+      const v = parseFloat(inp.value);
+      const id = (inp.id || inp.name || '').toLowerCase();
+      // Temperaturas pueden ser <= 0, pero volumenes, diametros, flujos, tiempos no
+      const allowZeroOrNeg = id.includes('temp') || id.includes('t_') || id.includes('dh');
+      if (Number.isFinite(v) && !allowZeroOrNeg && v <= 0) {
+        inp.classList.add('nucoil-input-bad');
+        anyNegative = true;
+      } else {
+        inp.classList.remove('nucoil-input-bad');
+      }
+    });
+
+    // Pintar en rojo los indicadores inferiores cuando fallan
+    document.querySelectorAll('.pill, .badge, [id*="status"], [id*="check"], [class*="status"]').forEach(el => {
+      const txt = (el.textContent || '').trim();
+      if (!/sumergido|impulsor|caudal|nivel|holgura/i.test(txt)) return;
+      const isBadText = /^[✕✗✖⚠]|no|insuficiente|fuera|choca|inválido|invalido|excede/i.test(txt);
+      const isBadClass = /(bad|err|error|danger|warn|warning|fail)/i.test(el.className);
+      const inlineRed = /#ef4444|#dc2626|#f87171|rgb\(\s*239|rgb\(\s*220/i.test(el.getAttribute('style') || '');
+      const forceNegBad = anyNegative && /sumergido|caudal/i.test(txt);
+
+      if (isBadText || isBadClass || inlineRed || forceNegBad) {
+        el.classList.add('nucoil-status-bad');
+      } else {
+        el.classList.remove('nucoil-status-bad');
+      }
+    });
+  }
+
+  function boot() {
+    injectHeaderButtons();
+    syncStatusColors();
+    const obs = new MutationObserver(() => syncStatusColors());
+    obs.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class', 'style'] });
+    document.addEventListener('input', syncStatusColors);
+    document.addEventListener('change', syncStatusColors);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>
 </body>
 </html>
 )HTML";
