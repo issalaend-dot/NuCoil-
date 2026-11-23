@@ -2950,9 +2950,9 @@ const std::string PAGINA_HTML = R"HTML(
     campos.forEach(id => document.getElementById(id).addEventListener('input', recalcular));
     window.addEventListener('DOMContentLoaded', recalcular);
   </script>
+
 <script id="nucoil-main-ui-enhance">
 (function(){
-  // Tema inicial persistente
   const saved = localStorage.getItem('nucoil-theme');
   if (saved === 'dark' || saved === 'light') {
     document.body.dataset.theme = saved;
@@ -2969,10 +2969,16 @@ const std::string PAGINA_HTML = R"HTML(
 
   function injectHeaderButtons() {
     if (document.getElementById('btn-abrir-plano')) return;
-    // Buscar la barra que contiene "Caso Base" o "Doran"
     const allBtns = [...document.querySelectorAll('button')];
     const presetBtn = allBtns.find(b => /caso base|doran|reporte/i.test(b.textContent || ''));
     const container = presetBtn ? presetBtn.parentElement : (document.querySelector('header') || document.body);
+
+    if (container) {
+      container.style.display = 'flex';
+      container.style.flexWrap = 'wrap';
+      container.style.gap = '8px';
+      container.style.alignItems = 'center';
+    }
 
     const link2d = document.createElement('a');
     link2d.id = 'btn-abrir-plano';
@@ -2997,46 +3003,52 @@ const std::string PAGINA_HTML = R"HTML(
     container.appendChild(themeBtn);
   }
 
+  let syncing = false;
   function syncStatusColors() {
-    // Revisar inputs numericos negativos o cero
-    let anyNegative = false;
-    document.querySelectorAll('input[type="number"], input[type="text"]').forEach(inp => {
-      const v = parseFloat(inp.value);
-      const id = (inp.id || inp.name || '').toLowerCase();
-      // Temperaturas pueden ser <= 0, pero volumenes, diametros, flujos, tiempos no
-      const allowZeroOrNeg = id.includes('temp') || id.includes('t_') || id.includes('dh');
-      if (Number.isFinite(v) && !allowZeroOrNeg && v <= 0) {
-        inp.classList.add('nucoil-input-bad');
-        anyNegative = true;
-      } else {
-        inp.classList.remove('nucoil-input-bad');
-      }
-    });
+    if (syncing) return;
+    syncing = true;
+    try {
+      let anyInvalidNum = false;
+      document.querySelectorAll('input[type="number"], input[type="text"]').forEach(inp => {
+        const v = parseFloat(inp.value);
+        const id = (inp.id || inp.name || '').toLowerCase();
+        const allowZeroOrNeg = id.includes('temp') || id.includes('t_') || id.includes('dh');
+        const badInp = Number.isFinite(v) && !allowZeroOrNeg && v <= 0;
+        if (badInp) anyInvalidNum = true;
+        if (inp.classList.contains('nucoil-input-bad') !== badInp) {
+          inp.classList.toggle('nucoil-input-bad', badInp);
+        }
+      });
 
-    // Pintar en rojo los indicadores inferiores cuando fallan
-    document.querySelectorAll('.pill, .badge, [id*="status"], [id*="check"], [class*="status"]').forEach(el => {
-      const txt = (el.textContent || '').trim();
-      if (!/sumergido|impulsor|caudal|nivel|holgura/i.test(txt)) return;
-      const isBadText = /^[✕✗✖⚠]|no|insuficiente|fuera|choca|inválido|invalido|excede/i.test(txt);
-      const isBadClass = /(bad|err|error|danger|warn|warning|fail)/i.test(el.className);
-      const inlineRed = /#ef4444|#dc2626|#f87171|rgb\(\s*239|rgb\(\s*220/i.test(el.getAttribute('style') || '');
-      const forceNegBad = anyNegative && /sumergido|caudal/i.test(txt);
+      document.querySelectorAll('.pill, .badge, [id*="status"], [id*="check"], [class*="status"]').forEach(el => {
+        const txt = (el.textContent || '').trim();
+        if (!/sumergencia|sumergido|impulsor|caudal|nivel|holgura/i.test(txt)) return;
+        const isBadText = /^[✕✗✖⚠]|no|insuficiente|fuera|choca|inválido|invalido|excede/i.test(txt);
+        const isBadClass = /(bad|err|error|danger|warn|warning|fail)/i.test(el.className);
+        const inlineRed = /#ef4444|#dc2626|#f87171|rgb\(\s*239|rgb\(\s*220/i.test(el.getAttribute('style') || '');
+        const forceNegBad = anyInvalidNum && /sumergencia|sumergido|caudal/i.test(txt);
+        const shouldBeBad = Boolean(isBadText || isBadClass || inlineRed || forceNegBad);
 
-      if (isBadText || isBadClass || inlineRed || forceNegBad) {
-        el.classList.add('nucoil-status-bad');
-      } else {
-        el.classList.remove('nucoil-status-bad');
-      }
-    });
+        if (el.classList.contains('nucoil-status-bad') !== shouldBeBad) {
+          el.classList.toggle('nucoil-status-bad', shouldBeBad);
+        }
+      });
+    } finally {
+      syncing = false;
+    }
   }
 
   function boot() {
     injectHeaderButtons();
     syncStatusColors();
-    const obs = new MutationObserver(() => syncStatusColors());
-    obs.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class', 'style'] });
-    document.addEventListener('input', syncStatusColors);
-    document.addEventListener('change', syncStatusColors);
+    document.addEventListener('input', () => setTimeout(syncStatusColors, 120));
+    document.addEventListener('change', () => setTimeout(syncStatusColors, 120));
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.closest('button')) {
+        setTimeout(syncStatusColors, 180);
+      }
+    });
+    setInterval(syncStatusColors, 900);
   }
 
   if (document.readyState === 'loading') {
