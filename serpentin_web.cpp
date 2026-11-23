@@ -2198,48 +2198,50 @@ APP.init();
   const back = document.getElementById('btn-volver-calc');
   if (back && location.protocol === 'file:') back.href = 'index.html';
   const q = new URLSearchParams(location.search);
-  if ([...q.keys()].length && window.BiorreactorApp) {
-    const entries = [...q.entries()].map(([k, v]) => [k.toLowerCase(), parseFloat(v)]);
-    const findVal = (exacts, parts) => {
-      for (const e of exacts) {
-        const hit = entries.find(([k, v]) => k === e.toLowerCase() && Number.isFinite(v) && v > 0);
-        if (hit) return hit[1];
-      }
-      for (const p of parts) {
-        const hit = entries.find(([k, v]) => k.includes(p) && Number.isFinite(v) && v > 0);
-        if (hit) return hit[1];
-      }
-      return null;
-    };
-    const patch = {};
-    const Di = findVal(['Di', 'Dt', 'diamTanque', 'diametroTanque'], ['diamtanque', 'diametrotanque', 'tanque']);
-    const Ht = findVal(['Ht', 'H', 'alturaTanque'], ['alturatanque', 'altura']);
-    const De = findVal(['De', 'dt', 'diamTubo', 'diametroTubo'], ['diamtubo', 'diametrotubo', 'tubo']);
-    const Dc = findVal(['Dc', 'diamHelice', 'diametroHelice'], ['diamhelice', 'diametrohelice', 'helice']);
-    const paso = findVal(['p', 'paso', 'pasoHelice'], ['paso']);
-    const Vw = findVal(['Vw', 'V', 'volTrabajo', 'volumen'], ['voltrabajo', 'volumen']);
-    const N = findVal(['N', 'vueltas', 'numVueltas'], ['vuelta']);
-    const Tin = findVal(['Tin', 'T_c_in', 'tempAguaIn'], ['aguain', 'entrada']);
-    const Tout = findVal(['Tout', 'T_c_out', 'tempAguaOut'], ['aguaout', 'salida']);
-    const caudal = findVal(['caudal', 'Q_agua', 'flujoAgua'], ['flujo', 'caudal']);
-    const T0 = findVal(['T0', 'T_op', 'tempOperacion'], ['operacion', 'cultivo']);
+  if (![...q.keys()].length || !window.BiorreactorApp) return;
 
-    if (Di) patch.Di = Di < 5 ? Di * 100 : Di;
-    if (Ht) patch.Ht = Ht < 10 ? Ht * 100 : Ht;
-    if (De) patch.De = De < 0.2 ? De * 1000 : De;
-    if (Dc) patch.Dc = Dc < 5 ? Dc * 100 : Dc;
-    if (paso) patch.p = paso < 1 ? paso * 100 : paso;
-    if (Vw) patch.Vw = Vw < 5 ? Vw * 1000 : Vw;
-    if (N) patch.N = N;
-    if (Tin !== null) patch.Tin = Tin;
-    if (Tout !== null) patch.Tout = Tout;
-    if (caudal) patch.caudal = caudal;
-    if (T0) { patch.T0 = T0; patch.Tobj = Math.max(4, T0 - 10); }
-
-    if (Object.keys(patch).length) {
-      try { window.BiorreactorApp.setParametros(patch); } catch (e) {}
+  const entries = [...q.entries()].map(([k, v]) => [k.toLowerCase(), parseFloat(v)]);
+  const pick = (keys) => {
+    for (const k of keys) {
+      const hit = entries.find(([ek, ev]) => ek === k.toLowerCase() && Number.isFinite(ev) && ev > 0);
+      if (hit) return hit[1];
     }
-  }
+    return null;
+  };
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+  const cur = window.BiorreactorApp.getParametros();
+  const Di_raw = pick(['diamTanque', 'Di', 'Dt']);
+  const Ht_raw = pick(['alturaTanque', 'Ht', 'H']);
+  const Vw_raw = pick(['volTrabajo', 'Vw', 'V']);
+  const De_raw = pick(['diamTubo', 'De', 'dt']);
+  const Dc_raw = pick(['diamHelice', 'Dc']);
+  const p_raw  = pick(['pasoHelice', 'p', 'paso']);
+  const fl_raw = pick(['flujoAgua', 'caudal', 'Q_agua']);
+  const Tin_raw = pick(['tempAguaIn', 'Tin', 'T_c_in']);
+  const Tout_raw = pick(['tempAguaOut', 'Tout', 'T_c_out']);
+  const T0_raw = pick(['tempOperacion', 'T0', 'T_op']);
+
+  const Di = clamp(Di_raw ? (Di_raw < 5 ? Di_raw * 100 : Di_raw) : cur.Di, 20, 150);
+  const Ht = clamp(Ht_raw ? (Ht_raw < 10 ? Ht_raw * 100 : Ht_raw) : cur.Ht, 30, 300);
+  const maxVw = Math.floor((Math.PI / 4) * (Di / 100) * (Di / 100) * (Ht / 100) * 1000 * 0.85);
+  const Vw = clamp(Vw_raw ? (Vw_raw < 5 ? Vw_raw * 1000 : Vw_raw) : cur.Vw, 5, Math.max(10, maxVw));
+  const De = clamp(De_raw ? (De_raw < 0.2 ? De_raw * 1000 : De_raw) : cur.De, 6, 40);
+  const Dc = clamp(Dc_raw ? (Dc_raw < 5 ? Dc_raw * 100 : Dc_raw) : cur.Dc, Di * 0.42, Di * 0.68);
+  const p  = clamp(p_raw  ? (p_raw < 1 ? p_raw * 100 : p_raw) : cur.p, (De / 10) * 1.6, 20);
+  const Hl_cm = (4 * (Vw / 1000)) / (Math.PI * (Di / 100) * (Di / 100)) * 100;
+  const maxN = Math.max(1, Math.min(35, Math.floor((Hl_cm - Math.max(0.08 * Di, De / 10) - De / 10) / p)));
+  const N = clamp(cur.N, 1, maxN);
+  const caudal = clamp(fl_raw ? (fl_raw < 10 ? fl_raw * 60 : fl_raw) : cur.caudal, 1, 450);
+
+  const T0 = clamp(T0_raw ?? cur.T0, 15, 75);
+  const Tobj = clamp(T0 - 10, 5, T0 - 2);
+  const Tin = clamp(Tin_raw ?? cur.Tin, -10, Tobj - 4);
+  const Tout = clamp(Tout_raw ?? cur.Tout, Tin + 2, Tobj - 1);
+
+  try {
+    window.BiorreactorApp.setParametros({ Vw, Di, Ht, De, Dc, p, N, caudal, T0, Tobj, Tin, Tout });
+  } catch (e) {}
 })();
 
 </script></body></html>
@@ -2289,7 +2291,7 @@ const std::string PAGINA_HTML = R"HTML(
     .brand { display: flex; align-items: center; gap: 12px; }
     .badge-cpp {
       background: linear-gradient(135deg, #1f6b6a, #2563eb);
-      color: #fff;
+      color: #0e2a29;
       font-weight: 800;
       padding: 6px 10px;
       border-radius: 8px;
@@ -2310,8 +2312,8 @@ const std::string PAGINA_HTML = R"HTML(
       cursor: pointer;
       transition: 0.15s;
     }
-    button:hover { border-color: var(--cyan); color: #fff; }
-    button.primary { background: #1f6b6a; border-color: #1f6b6a; color: #fff; }
+    button:hover { border-color: var(--cyan); color: #0e2a29; }
+    button.primary { background: #1f6b6a; border-color: #1f6b6a; color: #0e2a29; }
     button.primary:hover { background: #0369a1; }
     .container {
       max-width: 1420px;
@@ -2340,7 +2342,7 @@ const std::string PAGINA_HTML = R"HTML(
     }
     .tabs { display: flex; gap: 6px; margin-bottom: 14px; }
     .tab-btn { flex: 1; text-align: center; padding: 8px 6px; font-size: 0.78rem; }
-    .tab-btn.active { background: #1f6b6a; border-color: #1f6b6a; color: #fff; }
+    .tab-btn.active { background: #1f6b6a; border-color: #1f6b6a; color: #0e2a29; }
     .tab-pane { display: none; }
     .tab-pane.active { display: block; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -2370,7 +2372,7 @@ const std::string PAGINA_HTML = R"HTML(
       padding: 14px;
     }
     .kpi span { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; }
-    .kpi strong { display: block; font-size: 1.45rem; margin-top: 4px; color: #fff; }
+    .kpi strong { display: block; font-size: 1.45rem; margin-top: 4px; color: #0e2a29; }
     .kpi small { font-size: 0.75rem; color: var(--cyan); }
     .visual-grid {
       display: grid;
@@ -2390,7 +2392,7 @@ const std::string PAGINA_HTML = R"HTML(
     }
     .table-res { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     .table-res td { padding: 7px 6px; border-bottom: 1px solid var(--border); }
-    .table-res td:last-child { text-align: right; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+    .table-res td:last-child { text-align: right; font-weight: 700; color: #0e2a29; font-variant-numeric: tabular-nums; }
     .status-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
     @media (max-width: 720px) { .status-list { grid-template-columns: 1fr; } }
     .pill {
@@ -2426,18 +2428,17 @@ const std::string PAGINA_HTML = R"HTML(
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=JetBrains+Mono:wght@400;500;600&family=Spline+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
 <style id="amber-editorial-theme">
   :root {
     --ink: #16201f;
     --abyss: #0e2a29;
     --teal: #1f6b6a;
     --teal-bright: #2d8b8b;
-    --seafoam: #9ec9c6;
     --parchment: #f4f1e8;
     --parchment-deep: #ebe6d6;
     --cream: #fbfaf4;
     --gold: #b08440;
-    --gold-soft: #c89a52;
     --rule: #d8d2bf;
     --code-bg: #10302e;
     --code-ink: #dfeae7;
@@ -2453,29 +2454,41 @@ const std::string PAGINA_HTML = R"HTML(
     font-family: 'Spline Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
     background-color: #f4f1e8 !important;
     color: #16201f !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
     background-image:
       radial-gradient(circle at 12% 8%, rgba(45, 139, 139, 0.06), transparent 40%),
       radial-gradient(circle at 88% 92%, rgba(176, 132, 64, 0.06), transparent 42%) !important;
     -webkit-font-smoothing: antialiased;
+  }
+  header, .header, .top-bar {
+    padding-top: 18px !important;
+    margin-top: 0 !important;
   }
   h1, h2, h3, .title, .brand-title {
     font-family: 'Fraunces', Georgia, serif !important;
     color: #0e2a29 !important;
     letter-spacing: -0.015em;
   }
-  h1 { font-weight: 500 !important; }
-  h2, h3 { font-weight: 500 !important; }
   .card, .panel, .box, section {
     background: #fbfaf4 !important;
     border: 1px solid #d8d2bf !important;
     border-radius: 12px !important;
     box-shadow: 0 12px 28px -22px rgba(14, 42, 41, 0.35) !important;
   }
+  /* Cifras grandes en tarjetas KPI y valores en Desglose de Ingenieria */
+  .kpi-val, .kpi-value, .big-val, .stat-val, .metric-val,
+  .card strong, .card b, .res-val, .row-val, .data-val,
+  [id^="kpi"], [id^="res"], [id^="val"] {
+    font-family: 'JetBrains Mono', monospace !important;
+    color: #0e2a29 !important;
+    font-weight: 600 !important;
+  }
   input, select {
     font-family: 'JetBrains Mono', monospace !important;
     background: #f4f1e8 !important;
     color: #0e2a29 !important;
-    border: 1px solid #d8d2bf !important;
+    border: 1px solid #c4bca6 !important;
     border-radius: 8px !important;
   }
   input:focus, select:focus {
@@ -2483,10 +2496,10 @@ const std::string PAGINA_HTML = R"HTML(
     border-color: #1f6b6a !important;
     box-shadow: 0 0 0 3px rgba(31, 107, 106, 0.14) !important;
   }
-  label, .sub, .subtitle, p {
+  label, .sub, .subtitle, p, .muted {
     color: #3c4a48 !important;
   }
-  code, pre, .mono, .val, .value, .metric-val, .badge, .pill, table td, table th {
+  code, pre, .mono, .val, .value, .badge, .pill, table td, table th {
     font-family: 'JetBrains Mono', monospace !important;
   }
   .badge, .pill {
@@ -2494,16 +2507,29 @@ const std::string PAGINA_HTML = R"HTML(
     color: #1f6b6a !important;
     border: 1px solid rgba(31, 107, 106, 0.28) !important;
   }
-  button, .btn {
+  /* Pestanas inactivas vs activa */
+  .tab, .tab-btn, [role="tab"] {
+    font-family: 'JetBrains Mono', monospace !important;
+    background: #ebe6d6 !important;
+    color: #0e2a29 !important;
+    border: 1px solid #d8d2bf !important;
+    border-radius: 8px !important;
+  }
+  .tab.active, .tab-btn.active, [role="tab"].active, [role="tab"][aria-selected="true"] {
+    background: #1f6b6a !important;
+    color: #fbfaf4 !important;
+    border-color: #1f6b6a !important;
+  }
+  /* Botones de accion */
+  button:not(.tab):not(.tab-btn):not([role="tab"]), .btn {
     font-family: 'JetBrains Mono', monospace !important;
     background: #1f6b6a !important;
     color: #fbfaf4 !important;
     border: 1px solid #1f6b6a !important;
     border-radius: 8px !important;
     letter-spacing: 0.03em;
-    transition: background 0.2s ease, transform 0.1s ease;
   }
-  button:hover, .btn:hover {
+  button:not(.tab):not(.tab-btn):not([role="tab"]):hover, .btn:hover {
     background: #0e2a29 !important;
   }
   button.secondary, .btn-secondary {
