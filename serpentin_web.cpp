@@ -2474,14 +2474,14 @@ const std::string PAGINA_HTML = R"HTML(
     --card: #10302e;
     --border: #244b48;
     --text: #dfeae7;
-    --muted: #8fb5b0;
+    --muted: #9ec9c6;
     --input-bg: #0b2221;
     --input-border: #2b5451;
     --tab-bg: #153b38;
     --ok-bg: rgba(45, 139, 139, 0.18);
     --ok-fg: #9ec9c6;
     --ok-bd: rgba(158, 201, 198, 0.32);
-    --bad-bg: rgba(239, 68, 68, 0.20);
+    --bad-bg: rgba(239, 68, 68, 0.22);
     --bad-fg: #fca5a5;
     --bad-bd: #ef4444;
   }
@@ -2496,21 +2496,58 @@ const std::string PAGINA_HTML = R"HTML(
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3, .title, .brand-title {
+  /* Barra superior y titulos principales */
+  header, .header, .topbar, .top-bar, .hero, .brand-bar {
+    background: transparent !important;
+    color: var(--abyss) !important;
+  }
+  h1, h2, h3, h4, .title, .brand-title, header strong, header b, header span {
     font-family: 'Fraunces', Georgia, serif !important;
     color: var(--abyss) !important;
     letter-spacing: -0.015em;
   }
+  header .sub, header .subtitle, header p, header small {
+    font-family: 'Spline Sans', sans-serif !important;
+    color: var(--muted) !important;
+  }
 
-  .card, .panel, .box, section {
+  /* Tarjetas, KPIs y bloques de formulas matematicas */
+  .card, .panel, .box, section,
+  .kpi, .kpi-card, .stat, .stat-card, .metric, .metric-card,
+  .formula, .formula-card, .formula-box, .eq, .equation, .math-box, .theory,
+  [class*="card"], [class*="kpi"], [class*="formula"], [class*="equation"],
+  body[data-theme="dark"] [data-dark-surface="1"] {
     background: var(--card) !important;
+    color: var(--text) !important;
     border: 1px solid var(--border) !important;
-    border-top-color: var(--border) !important;
     border-radius: 12px !important;
     box-shadow: 0 12px 28px -22px rgba(0, 0, 0, 0.35) !important;
   }
 
-  /* Ocultar cualquier barra roja superior de alerta */
+  /* Contraste interno en formulas matematicas y textos en modo oscuro */
+  body[data-theme="dark"] section *,
+  body[data-theme="dark"] .formula *,
+  body[data-theme="dark"] [class*="formula"] *,
+  body[data-theme="dark"] [data-dark-surface="1"] * {
+    color: var(--text);
+  }
+  body[data-theme="dark"] section h2,
+  body[data-theme="dark"] section h3,
+  body[data-theme="dark"] section strong,
+  body[data-theme="dark"] section b,
+  body[data-theme="dark"] [data-dark-surface="1"] strong,
+  body[data-theme="dark"] [data-dark-surface="1"] b {
+    color: var(--abyss) !important;
+  }
+  body[data-theme="dark"] section code,
+  body[data-theme="dark"] .formula code,
+  body[data-theme="dark"] [data-dark-surface="1"] code {
+    background: #081918 !important;
+    color: #e6b566 !important;
+    border: 1px solid #244b48 !important;
+  }
+
+  /* Ocultar cualquier barra roja superior */
   #error-banner, #alert-banner, .error-banner, .alert-danger, .top-error {
     display: none !important;
   }
@@ -2540,10 +2577,7 @@ const std::string PAGINA_HTML = R"HTML(
     background: var(--bad-bg) !important;
   }
 
-  label, .sub, .subtitle, p, .muted, span {
-    color: var(--text);
-  }
-  .sub, .subtitle, .muted, label {
+  label, .sub, .subtitle, p, .muted {
     color: var(--muted) !important;
   }
 
@@ -2551,20 +2585,19 @@ const std::string PAGINA_HTML = R"HTML(
     font-family: 'JetBrains Mono', monospace !important;
   }
 
-  /* Indicadores inferiores: verde cuando cumplen, rojo cuando fallan */
+  /* Indicadores individuales inferiores: solo se pinta el recuadro afectado */
   .badge, .pill {
-    background: var(--ok-bg);
-    color: var(--ok-fg);
-    border: 1px solid var(--ok-bd);
+    background: var(--ok-bg) !important;
+    color: var(--ok-fg) !important;
+    border: 1px solid var(--ok-bd) !important;
     border-radius: 8px !important;
     transition: all 0.2s ease;
   }
-  .badge.bad, .badge.err, .badge.error, .badge.danger, .badge.warn, .badge.warning,
-  .pill.bad, .pill.err, .pill.error, .pill.danger, .pill.warn, .pill.warning,
   .nucoil-status-bad {
     background: var(--bad-bg) !important;
     color: var(--bad-fg) !important;
     border: 1.5px solid var(--bad-bd) !important;
+    border-radius: 8px !important;
     font-weight: 600 !important;
   }
 
@@ -2591,10 +2624,6 @@ const std::string PAGINA_HTML = R"HTML(
     border-radius: 8px !important;
     letter-spacing: 0.02em;
     cursor: pointer;
-    transition: opacity 0.2s ease, transform 0.1s ease;
-  }
-  button:not(.tab):not(.tab-btn):not([role="tab"]):hover, .btn:hover {
-    opacity: 0.9;
   }
   button.secondary, .btn-secondary, #btn-theme-main {
     background: var(--card) !important;
@@ -2958,6 +2987,21 @@ const std::string PAGINA_HTML = R"HTML(
     document.body.dataset.theme = saved;
   }
 
+  function applyDarkSurfaces() {
+    const isDark = document.body.dataset.theme === 'dark';
+    document.querySelectorAll('div, section, article, header, aside').forEach(el => {
+      if (!isDark) {
+        if (el.dataset.darkSurface) delete el.dataset.darkSurface;
+        return;
+      }
+      if (el.classList.contains('nucoil-status-bad') || el.classList.contains('pill') || el.classList.contains('badge')) return;
+      const bg = getComputedStyle(el).backgroundColor;
+      if (bg === 'rgb(251, 250, 244)' || bg === 'rgb(244, 241, 232)' || bg === 'rgb(235, 230, 214)' || bg === 'rgb(255, 255, 255)') {
+        el.dataset.darkSurface = '1';
+      }
+    });
+  }
+
   function buildPlanoHref() {
     const qs = new URLSearchParams();
     document.querySelectorAll('input[id], input[name]').forEach(el => {
@@ -2997,6 +3041,7 @@ const std::string PAGINA_HTML = R"HTML(
       const next = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
       document.body.dataset.theme = next;
       localStorage.setItem('nucoil-theme', next);
+      applyDarkSurfaces();
     });
 
     container.appendChild(link2d);
@@ -3008,26 +3053,27 @@ const std::string PAGINA_HTML = R"HTML(
     if (syncing) return;
     syncing = true;
     try {
-      let anyInvalidNum = false;
       document.querySelectorAll('input[type="number"], input[type="text"]').forEach(inp => {
         const v = parseFloat(inp.value);
         const id = (inp.id || inp.name || '').toLowerCase();
-        const allowZeroOrNeg = id.includes('temp') || id.includes('t_') || id.includes('dh');
-        const badInp = Number.isFinite(v) && !allowZeroOrNeg && v <= 0;
-        if (badInp) anyInvalidNum = true;
+        const allowNeg = id.includes('temp') || id.includes('t_') || id.includes('dh');
+        const allowZero = allowNeg || id.includes('factor') || id.includes('q_g') || id.includes('aire');
+        const badInp = Number.isFinite(v) && (allowZero ? v < 0 : (allowNeg ? false : v <= 0));
         if (inp.classList.contains('nucoil-input-bad') !== badInp) {
           inp.classList.toggle('nucoil-input-bad', badInp);
         }
       });
 
-      document.querySelectorAll('.pill, .badge, [id*="status"], [id*="check"], [class*="status"]').forEach(el => {
+      // Evaluar unicamente cada recuadro individual (no contenedores padre)
+      document.querySelectorAll('.pill, .badge').forEach(el => {
+        if (el.querySelector('.pill, .badge')) return;
         const txt = (el.textContent || '').trim();
         if (!/sumergencia|sumergido|impulsor|caudal|nivel|holgura/i.test(txt)) return;
+
+        const explicitlyOk = /^✓/.test(txt) && !/no|insuficiente|fuera|choca|inválido|invalido|excede/i.test(txt);
         const isBadText = /^[✕✗✖⚠]|no|insuficiente|fuera|choca|inválido|invalido|excede/i.test(txt);
         const isBadClass = /(bad|err|error|danger|warn|warning|fail)/i.test(el.className);
-        const inlineRed = /#ef4444|#dc2626|#f87171|rgb\(\s*239|rgb\(\s*220/i.test(el.getAttribute('style') || '');
-        const forceNegBad = anyInvalidNum && /sumergencia|sumergido|caudal/i.test(txt);
-        const shouldBeBad = Boolean(isBadText || isBadClass || inlineRed || forceNegBad);
+        const shouldBeBad = !explicitlyOk && Boolean(isBadText || isBadClass);
 
         if (el.classList.contains('nucoil-status-bad') !== shouldBeBad) {
           el.classList.toggle('nucoil-status-bad', shouldBeBad);
@@ -3040,12 +3086,13 @@ const std::string PAGINA_HTML = R"HTML(
 
   function boot() {
     injectHeaderButtons();
+    applyDarkSurfaces();
     syncStatusColors();
     document.addEventListener('input', () => setTimeout(syncStatusColors, 120));
     document.addEventListener('change', () => setTimeout(syncStatusColors, 120));
     document.addEventListener('click', (e) => {
       if (e.target && e.target.closest('button')) {
-        setTimeout(syncStatusColors, 180);
+        setTimeout(() => { syncStatusColors(); applyDarkSurfaces(); }, 180);
       }
     });
     setInterval(syncStatusColors, 900);
