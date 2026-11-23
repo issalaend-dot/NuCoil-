@@ -2491,15 +2491,27 @@ const std::string PAGINA_HTML = R"HTML(
     background-color: var(--bg) !important;
     color: var(--text) !important;
     margin: 0 !important;
-    padding-top: 10px !important;
+    padding-top: 0 !important;
     transition: background-color 0.2s ease, color 0.2s ease;
     -webkit-font-smoothing: antialiased;
   }
 
   /* Barra superior y titulos principales */
-  header, .header, .topbar, .top-bar, .hero, .brand-bar {
-    background: transparent !important;
+  header, .header, .topbar, .top-bar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 50 !important;
+    background-color: var(--card) !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 14px 24px !important;
+    margin-bottom: 18px !important;
+    box-shadow: 0 8px 20px -14px rgba(0, 0, 0, 0.35) !important;
     color: var(--abyss) !important;
+  }
+  header > div, header .hero, header .brand-bar {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
   h1, h2, h3, h4, .title, .brand-title, header strong, header b, header span {
     font-family: 'Fraunces', Georgia, serif !important;
@@ -2661,7 +2673,7 @@ const std::string PAGINA_HTML = R"HTML(
 <body data-theme="light">
 <header>
     <div class="brand">
-      <div class="badge-cpp">C++17 ENGINE</div>
+      
       <div>
         <h1>BioCoil Studio · Diseño de Serpentín de Enfriamiento</h1>
         <small>Fenómenos de Transporte · Diseño Térmico de Biorreactores</small>
@@ -3012,6 +3024,7 @@ const std::string PAGINA_HTML = R"HTML(
   }
 
   function injectHeaderButtons() {
+    document.querySelectorAll('span, div, small, b, strong').forEach(el => { if (el.children.length === 0 && /c\+\+17\s*engine/i.test(el.textContent || '')) el.style.display = 'none'; });
     if (document.getElementById('btn-abrir-plano')) return;
     const allBtns = [...document.querySelectorAll('button')];
     const presetBtn = allBtns.find(b => /caso base|doran|reporte/i.test(b.textContent || ''));
