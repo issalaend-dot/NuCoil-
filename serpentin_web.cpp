@@ -2669,6 +2669,29 @@ const std::string PAGINA_HTML = R"HTML(
     border-top: 1px solid var(--border) !important;
   }
 </style>
+<style id="nucoil-math-contrast">
+  body[data-theme="dark"] [data-math-section="1"],
+  body[data-theme="dark"] [data-math-section="1"] div,
+  body[data-theme="dark"] [data-math-section="1"] p,
+  body[data-theme="dark"] [data-math-section="1"] span,
+  body[data-theme="dark"] [data-math-section="1"] li,
+  body[data-theme="dark"] [data-math-section="1"] code,
+  body[data-theme="dark"] [data-math-section="1"] sub,
+  body[data-theme="dark"] [data-math-section="1"] sup {
+    color: #dfeae7 !important;
+  }
+  body[data-theme="dark"] [data-math-section="1"] strong,
+  body[data-theme="dark"] [data-math-section="1"] b {
+    color: #f4f1e8 !important;
+  }
+  body[data-theme="light"] [data-math-section="1"] div,
+  body[data-theme="light"] [data-math-section="1"] p,
+  body[data-theme="light"] [data-math-section="1"] span,
+  body[data-theme="light"] [data-math-section="1"] li,
+  body[data-theme="light"] [data-math-section="1"] code {
+    color: #16201f !important;
+  }
+</style>
 </head>
 <body data-theme="light">
 <header>
@@ -3098,6 +3121,11 @@ const std::string PAGINA_HTML = R"HTML(
   }
 
   function boot() {
+    document.querySelectorAll('section, .card, div').forEach(el => {
+      if (el.querySelector('h2, h3, h4, strong, b') && /fundamentaci[oó]n matem[aá]tica/i.test(el.textContent || '') && el.textContent.length < 1500) {
+        el.dataset.mathSection = '1';
+      }
+    });
     injectHeaderButtons();
     applyDarkSurfaces();
     syncStatusColors();
